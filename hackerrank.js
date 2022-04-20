@@ -1,7 +1,7 @@
 const puppeteer = require("puppeteer")
 
-let email = "adityac486@gmail.com"
-let password = "@dityaAD7"
+let {email, password} = require('./secrets')
+
 let cTab
 let browserOpenPromise = puppeteer.launch({
     headless:false,
@@ -44,8 +44,34 @@ browserOpenPromise
    })
    .then(function(){
        console.log("Logged into hackerrank succesfully")
+       // waitAndClick will wait for the selector to load, and then click on the node
+       let algorithmTabOpenedPromise = waitAndClick("div[data-automation='algorithms']")
+       return algorithmTabOpenedPromise
+   })
+   .then(function(){
+       console.log("Algorithm tab is opened")
    })
    .catch(function(err){
        console.log(err);
    })
 
+function waitAndClick(selector){
+    let myPromise = new Promise(function(resolve, reject){
+        let waitForSelectorPromise = cTab.waitForSelector(selector)
+        waitForSelectorPromise
+            .then(function(){
+                console.log("Selector is found")
+               let clickPromise = cTab.click(selector)
+               return clickPromise
+            })
+            .then(function(){
+                console.log("Selector is clicked")
+                // resolve()
+            })
+            .catch(function(err){
+                console.log(err)
+            })
+    })
+
+    return myPromise
+}
