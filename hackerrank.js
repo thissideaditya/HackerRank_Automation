@@ -42,18 +42,43 @@ browserOpenPromise
        let loggedInPromise = cTab.click(".ui-btn.ui-btn-large.ui-btn-primary.auth-button.ui-btn-styled")
        return loggedInPromise
    })
-   .then(function(){
-       console.log("Logged into hackerrank succesfully")
-       // waitAndClick will wait for the selector to load, and then click on the node
-       let algorithmTabOpenedPromise = waitAndClick("div[data-automation='algorithms']")
-       return algorithmTabOpenedPromise
-   })
-   .then(function(){
-       console.log("Algorithm tab is opened")
-   })
-   .catch(function(err){
-       console.log(err);
-   })
+   .then(function () {
+    console.log("logged into hackerrank successfully")
+    //waitAndClick will wait for the selector to load , and then click on the node
+    let algorithmTabWillBeOPenedPromise = waitAndClick(
+      "div[data-automation='algorithms']"
+    )
+    return algorithmTabWillBeOPenedPromise
+  })
+  .then(function () {
+    console.log("algorithm page is opened")
+    let allQuesPromise = cTab.waitForSelector(
+      'a[data-analytics="ChallengeListChallengeName"]'
+    )
+    return allQuesPromise
+  })
+  .then(function () {
+    function getAllQuesLinks() {
+      let allElemArr = document.querySelectorAll(
+        'a[data-analytics="ChallengeListChallengeName"]'
+      )
+      let linksArr = []
+      for (let i = 0; i < allElemArr.length; i++) {
+        linksArr.push(allElemArr[i].getAttribute("href"))
+      }
+      return linksArr
+    }
+    let linksArrPromise = cTab.evaluate(getAllQuesLinks)
+    return linksArrPromise
+  })
+  .then(function (linksArr) {
+    console.log("links to all ques received")
+    // console.log(linksArr)
+    // solve karna h
+  })
+  .catch(function (err) {
+    console.log(err);
+  })
 
 function waitAndClick(selector){
     let myPromise = new Promise(function(resolve, reject){
@@ -66,7 +91,7 @@ function waitAndClick(selector){
             })
             .then(function(){
                 console.log("Selector is clicked")
-                // resolve()
+                resolve()
             })
             .catch(function(err){
                 console.log(err)
