@@ -1,6 +1,7 @@
 const puppeteer = require("puppeteer")
 
 let {email, password} = require('./secrets')
+let {answer} = require('./codes')
 
 let cTab
 let browserOpenPromise = puppeteer.launch({
@@ -74,10 +75,15 @@ browserOpenPromise
   .then(function (linksArr) {
     console.log("links to all ques received")
     // console.log(linksArr)
-    // solve karna h
+                            // link of the qs to be solved, idx of the qs
+    let queWillBeSolvedPromise = questionSolver(linksArr[0], 0)
+    return queWillBeSolvedPromise
+  })
+  .then(function(){
+    console.log("Question is solved")
   })
   .catch(function (err) {
-    console.log(err);
+    reject(err);
   })
 
 function waitAndClick(selector){
@@ -99,4 +105,70 @@ function waitAndClick(selector){
     })
 
     return myPromise
+}
+
+function questionSolver(url, idx){
+  return new Promise(function(resolve, reject){
+    let fullLink = `https://www.hackerrank.com${url}`
+    let gotoQsPromise = cTab.goto(fullLink)
+    gotoQsPromise
+    .then(function(){
+      console.log("Question is opened")
+      let chckBoxClicked = waitAndClick(".checkbox-input")
+      return chckBoxClicked
+    })
+    .then(function(){
+      // select the box where the code will be typed
+      let waitForTextBoxPromise = cTab.waitForSelector(".custominput")
+      return waitForTextBoxPromise
+    })
+    .then(function(){
+      let codeIsTypedPromise = cTab.type(".custominput", answer[idx])
+      return codeIsTypedPromise
+    })
+    .then(function(){
+      // command key is pressed
+      let commandKeyPromise = cTab.keyboard.press("Control")
+      return commandKeyPromise
+    })
+    .then(function(){
+      // a key is pressed
+      let aKeyPromise = cTab.keyboard.press("a")
+      return aKeyPromise
+    })
+    .then(function(){
+      // x key is pressed
+      let xKeyPromise = cTab.keyboard.press("x")
+      return xKeyPromise
+    })
+    .then(function(){
+      let selectEditorPromise = cTab.click('div[style="top:0px;height:23px;"]')
+      return selectEditorPromise
+    })
+    .then(function(){
+      // a key is pressed
+      let aKeyPromise = cTab.keyboard.press("a")
+      return aKeyPromise
+    })
+    .then(function(){
+      // v key is pressed
+      let vKeyPromise = cTab.keyboard.press("v")
+      return vKeyPromise
+    })
+    .then(function(){
+      let submitClickedPromise = cTab.click(".hr-monaco-submit")
+      return submitClickedPromise
+    })
+    .then(function(){
+      let commandDownPromise = cTab.keyboard.up("Control")
+      return commandDownPromise
+    })
+    .then(function(){
+      console.log("Code submited successfully")
+      resolve()
+    })
+    .catch(function(err){
+      reject(err)
+    })
+  })
 }
