@@ -77,6 +77,11 @@ browserOpenPromise
     // console.log(linksArr)
                             // link of the qs to be solved, idx of the qs
     let queWillBeSolvedPromise = questionSolver(linksArr[0], 0)
+    for(let i = 1; i < linksArr.length; i++){
+    let queWillBeSolvedPromise = queWillBeSolvedPromise.then(function(){
+      return questionSolver(linksArr[i], i)
+     })
+    }
     return queWillBeSolvedPromise
   })
   .then(function(){
@@ -128,7 +133,7 @@ function questionSolver(url, idx){
     })
     .then(function(){
       // command key is pressed
-      let commandKeyPromise = cTab.keyboard.press("Control")
+      let commandKeyPromise = cTab.keyboard.down("Control")
       return commandKeyPromise
     })
     .then(function(){
@@ -142,26 +147,37 @@ function questionSolver(url, idx){
       return xKeyPromise
     })
     .then(function(){
-      let selectEditorPromise = cTab.click('div[style="top:0px;height:23px;"]')
-      return selectEditorPromise
+      let controlReleasedPromise = cTab.keyboard.up("Control")
+      return controlReleasedPromise
+    })
+    .then(function () {
+      //select the editor promise
+      let cursorOnEditorPromise = cTab.click(
+        ".monaco-editor.no-user-select.vs"
+      )
+      return cursorOnEditorPromise
+    })
+    .then(function(){
+      let commandPressedPromise = cTab.keyboard.down("Control")
+      return commandPressedPromise
     })
     .then(function(){
       // a key is pressed
-      let aKeyPromise = cTab.keyboard.press("a")
+      let aKeyPromise = cTab.keyboard.press("A",{delay:100})
       return aKeyPromise
     })
     .then(function(){
       // v key is pressed
-      let vKeyPromise = cTab.keyboard.press("v")
+      let vKeyPromise = cTab.keyboard.press("V", {delay:100})
       return vKeyPromise
-    })
-    .then(function(){
-      let submitClickedPromise = cTab.click(".hr-monaco-submit")
-      return submitClickedPromise
     })
     .then(function(){
       let commandDownPromise = cTab.keyboard.up("Control")
       return commandDownPromise
+    })
+    .then(function(){
+      let submitClickedPromise = cTab.click(".hr-monaco-submit")
+      return submitClickedPromise
     })
     .then(function(){
       console.log("Code submited successfully")
